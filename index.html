@@ -295,6 +295,8 @@ body {
 }
 .upload-submit-btn:hover { background: var(--maroon); }
 .upload-submit-btn:disabled { background: var(--muted); cursor: not-allowed; box-shadow: none; }
+/* Outside the application window: attach buttons greyed out and unclickable */
+.uploads-closed .upload-label-btn { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 .upload-submit-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
 .upload-result { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 13.5px; line-height: 1.6; display: none; text-align: left; }
 .upload-result.show { display: block; }
@@ -815,7 +817,7 @@ body {
     </div>
     <div class="upload-submit-wrap">
       <button class="upload-submit-btn" id="uploadSubmitBtn" onclick="submitApplicationPackage()">&#8593; Submit Application Package</button>
-      <div class="upload-submit-hint">You do not need to attach every document now &mdash; you may submit what you have and send the rest separately to <strong>clinical.privileges@msjmc.org</strong>. Reference letters and transcripts sent directly by a third party do not need to be attached here.</div>
+      <div class="upload-submit-hint">We recommend submitting all your documents together as a single package. If a document is not yet available, you may submit what you have now and forward the outstanding items to <strong>clinical.privileges@msjmc.org</strong>. Reference letters and transcripts sent directly by a referee or institution do not need to be attached here.</div>
       <div class="upload-result" id="uploadResult"></div>
     </div>
     <nav class="page-nav" aria-label="Page navigation">
@@ -855,7 +857,7 @@ body {
     </div>
     <div class="info-card">
       <h3>Submitting your completed form</h3>
-      <p>Completed forms and all supporting documents should be submitted together as a complete package. The easiest way is to attach everything directly on the <a onclick="showPage('requirements')" href="#requirements">Requirements page</a> and submit it online. You may instead email your package to <a href="mailto:clinical.privileges@msjmc.org">clinical.privileges@msjmc.org</a>, deliver it in person to the Information Desk at the hospital, or mail it to the Office of the Medical Director. Please include your full name and the words &ldquo;Internship Application&rdquo; in the subject line of any email. See the <a onclick="showPage('contact')" href="#contact">Contact page</a> for the full mailing address.</p>
+      <p>Wherever possible, please submit your completed form and all supporting documents together as a single package. The simplest way to do this is to attach everything on the <a onclick="showPage('requirements')" href="#requirements">Requirements page</a> and submit it online. Alternatively, you may email your package to <a href="mailto:clinical.privileges@msjmc.org">clinical.privileges@msjmc.org</a>, deliver it in person to the Information Desk at the hospital, or mail it to the Office of the Medical Director. If a document is not yet available, you may submit what you have and forward the outstanding items to <a href="mailto:clinical.privileges@msjmc.org">clinical.privileges@msjmc.org</a> as soon as possible. Please include your full name and the words &ldquo;Internship Application&rdquo; in the subject line of any email. See the <a onclick="showPage('contact')" href="#contact">Contact page</a> for the full mailing address.</p>
     </div>
     <nav class="page-nav" aria-label="Page navigation">
       <a class="page-nav-btn" onclick="showPage('requirements')" href="#requirements">&#8592; Requirements</a>
@@ -1033,8 +1035,16 @@ function showWindowClosedNotice() {
 }
 
 // Show the notice as soon as the page loads, so applicants don't attach files for nothing.
+// Outside the window, also grey out every "Attach file(s)" button and the Submit button,
+// so applicants can't spend time attaching files that can't be sent yet.
+// Everything switches back on automatically on 01 April (or with the staff test link).
 document.addEventListener('DOMContentLoaded', function(){
-  if (!isApplicationWindowOpen()) showWindowClosedNotice();
+  if (isApplicationWindowOpen()) return;
+  showWindowClosedNotice();
+  document.body.classList.add('uploads-closed');
+  document.querySelectorAll('.upload-input').forEach(function(inp){ inp.disabled = true; });
+  var btn = document.getElementById('uploadSubmitBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '&#128197; Online submissions open 01 April'; }
 });
 
 function describeFiles(fileList) {
